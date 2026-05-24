@@ -1,0 +1,16 @@
+{
+  "id": "DvPuYUHvxZ45TRC9",
+  "name": "Daily Ads Audit + PDF Report",
+  "description": "8AM daily: POSTs action=ads-audit to Mac via Cloudflare Tunnel to run daily-ads-audit.py.",
+  "active": true,
+  "trigger": "Schedule cron 0 8 * * * (8AM daily)",
+  "nodes": [
+    {"name": "Daily 8AM", "type": "scheduleTrigger", "cron": "0 8 * * *"},
+    {"name": "Run Ads Audit", "type": "httpRequest", "method": "POST", "url": "https://opposed-sheep-advances-mesh.trycloudflare.com", "body": "{\"action\":\"ads-audit\"}", "timeout": 180000, "neverError": true},
+    {"name": "Set Output Fields", "type": "set", "fields": ["status", "audit_date", "output_preview(500)"]}
+  ],
+  "flow": "8AM cron → POST action=ads-audit → Output",
+  "historical_version_notes": "v1 ran python3 daily-ads-audit.py locally + saved JSON report to ~/Downloads",
+  "local_script": "/Users/mc/.claude/bin/daily-ads-audit.py",
+  "report_save_path": "~/Downloads/ads-audit-{timestamp}.json"
+}

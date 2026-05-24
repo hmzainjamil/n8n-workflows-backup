@@ -1,0 +1,16 @@
+{
+  "id": "JZjHCsUN0AOY9xFM",
+  "name": "Agency Pipeline — Email Pickup + Lead Processing",
+  "description": "Every 15min: POSTs action=agency-run to Mac via Cloudflare Tunnel. Routes to register-lead or no-leads branch.",
+  "active": true,
+  "trigger": "Schedule every 15 minutes",
+  "nodes": [
+    {"name": "Every 15 Minutes", "type": "scheduleTrigger", "interval": "15min"},
+    {"name": "Email Pickup + Agency Run", "type": "httpRequest", "method": "POST", "url": "https://opposed-sheep-advances-mesh.trycloudflare.com", "body": "{\"action\":\"agency-run\"}", "timeout": 60000, "neverError": true},
+    {"name": "Has Leads?", "type": "if", "condition": "output contains 'lead'"},
+    {"name": "Register Lead", "type": "httpRequest", "body": "{\"action\":\"register\",\"type\":\"agent\",\"name\":\"agency-lead-agent\",\"path\":\"/Users/mc/.claude/bin/agency-run\",\"desc\":\"Active lead detected\"}"},
+    {"name": "No New Leads", "type": "set", "status": "no_new_leads"}
+  ],
+  "flow": "Every 15min → agency-run → [lead detected → register | no leads → set status]",
+  "local_script": "/Users/mc/.claude/bin/agency-run"
+}

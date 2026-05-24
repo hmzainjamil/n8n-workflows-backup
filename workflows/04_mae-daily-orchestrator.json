@@ -1,0 +1,16 @@
+{
+  "id": "0lbTMRzHmab48mQa",
+  "name": "MAE Daily Orchestrator",
+  "description": "7AM daily: POSTs action=mae-daily to Mac via Cloudflare Tunnel to run mae daily + tcc-dashboard.",
+  "active": true,
+  "trigger": "Schedule cron 0 7 * * * (7AM daily)",
+  "nodes": [
+    {"name": "Every Day 7AM", "type": "scheduleTrigger", "cron": "0 7 * * *"},
+    {"name": "Run MAE Daily", "type": "httpRequest", "method": "POST", "url": "https://opposed-sheep-advances-mesh.trycloudflare.com", "body": "{\"action\":\"mae-daily\"}", "timeout": 120000, "neverError": true},
+    {"name": "Output Summary", "type": "set", "fields": ["status", "ran_at", "output_preview(500)"]}
+  ],
+  "flow": "7AM cron → POST action=mae-daily → Summary",
+  "historical_version_notes": "v1 ran mae+tcc locally via execSync, v2 proxies via Cloudflare tunnel",
+  "local_scripts": ["mae daily", "tcc-dashboard"],
+  "local_log": "/Users/mc/.claude/inventory/mae-daily.log"
+}

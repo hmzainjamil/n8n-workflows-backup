@@ -1,0 +1,15 @@
+{
+  "id": "H9BixqXa6ytWmESF",
+  "name": "Inventory Sync Agent",
+  "description": "Every 30min: POSTs action=refresh to Mac via Cloudflare Tunnel to run inventory-scan.py. Gracefully handles laptop-offline.",
+  "active": true,
+  "trigger": "Schedule every 30 minutes",
+  "nodes": [
+    {"name": "Every 30 Minutes", "type": "scheduleTrigger", "interval": "30min"},
+    {"name": "Run Inventory Scan", "type": "httpRequest", "method": "POST", "url": "https://opposed-sheep-advances-mesh.trycloudflare.com", "body": "{\"action\":\"refresh\"}", "neverError": true},
+    {"name": "Summary Output", "type": "set", "fields": ["status", "timestamp", "output_preview(300)"]}
+  ],
+  "flow": "Every 30min → POST action=refresh → Summary",
+  "tunnel_url": "https://opposed-sheep-advances-mesh.trycloudflare.com",
+  "local_script": "inventory-scan.py"
+}

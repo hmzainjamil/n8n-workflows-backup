@@ -1,0 +1,23 @@
+{
+  "id": "xGbBbfudIXc1BPQL",
+  "name": "Multi-Agent LLM Router",
+  "description": "Webhook routes tasks to Groq (fast), OpenAI (quality), or Ollama (local) based on the priority field, then returns the LLM response.",
+  "active": true,
+  "webhook_path": "/webhook/llm-route",
+  "trigger": "POST webhook",
+  "nodes": [
+    {"name": "Webhook", "type": "n8n-nodes-base.webhook", "path": "llm-route", "method": "POST"},
+    {"name": "Extract Route", "type": "code", "logic": "priority=fast→groq, quality→openai, local→ollama"},
+    {"name": "Route Switch", "type": "switch", "outputs": ["groq","openai","ollama"]},
+    {"name": "Groq API", "type": "httpRequest", "url": "https://api.groq.com/openai/v1/chat/completions", "model": "llama3-8b-8192", "auth": "$env.GROQ_API_KEY"},
+    {"name": "OpenAI API", "type": "httpRequest", "url": "https://api.openai.com/v1/chat/completions", "model": "gpt-4o-mini", "auth": "$env.OPENAI_API_KEY"},
+    {"name": "Ollama API", "type": "httpRequest", "url": "http://localhost:11434/api/chat", "model": "qwen2.5:7b"},
+    {"name": "Merge Results", "type": "merge", "mode": "append", "inputs": 3},
+    {"name": "Extract Response", "type": "code", "logic": "extract choices[0].message.content or message.content or response"},
+    {"name": "Respond to Webhook", "type": "respondToWebhook"}
+  ],
+  "flow": "Webhook → Extract Route → Route Switch → [Groq|OpenAI|Ollama] → Merge → Extract Response → Respond",
+  "env_vars": ["GROQ_API_KEY", "OPENAI_API_KEY"],
+  "code_extract_route": "const body = $input.first().json.body || $input.first().json;\nconst priority = (body.priority || 'fast').toLowerCase();\nconst prompt = body.prompt || body.task || 'Hello';\nconst route = priority === 'quality' ? 'openai' : priority === 'local' ? 'ollama' : 'groq';\nreturn [{ json: { priority, prompt, route, request_id: Date.now().toString() } }];",
+  "code_extract_response": "const item = $input.first().json;\nconst text = item.choices?.[0]?.message?.content \n  || item.message?.content\n  || item.response \n  || 'no response';\nreturn [{ json: { response: text, model_used: item.model || 'unknown', route: item.route || 'unknown' } }];"
+}

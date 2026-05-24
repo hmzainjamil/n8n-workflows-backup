@@ -1,0 +1,39 @@
+{
+  "id": "VfwJVsxihSgOqxoZ",
+  "name": "YouTube Shorts Autopilot — Free Stack",
+  "description": "YouTube Shorts autopilot: Trends→Groq→TTS→Dashscope→Shotstack→YouTube→Sheets+Telegram. 3x daily.",
+  "active": true,
+  "trigger": "Schedule 3x daily: 9AM, 3PM, 9PM UTC",
+  "pipeline": [
+    "1. Fetch Google Trends RSS (US)",
+    "2. Parse random trending topic",
+    "3. Generate script JSON via Groq llama3-70b-8192",
+    "4. Parse: title(60), description(280), narration(65-80w), hashtags(5)",
+    "5. Build metadata: tts_url (StreamElements Brian), image_prompt",
+    "6. Submit Dashscope wanx2.1-t2i-turbo image (720x1280, async)",
+    "7. Wait 20s → Poll Dashscope task",
+    "8. Build Shotstack payload (image+TTS audio+title overlay)",
+    "9. Submit Shotstack render (stage)",
+    "10. Wait 50s → Poll Shotstack status",
+    "11. YouTube resumable upload init",
+    "12. Download rendered MP4 from Shotstack",
+    "13. Upload to YouTube (public, categoryId=28)",
+    "14. Log to Google Sheets (date, title, youtube_url, shotstack_url, status)",
+    "15. Telegram notify"
+  ],
+  "env_vars": ["GROQ_API_KEY", "WAN_API_KEY", "SHOTSTACK_API_KEY", "YOUTUBE_OAUTH_TOKEN", "GOOGLE_SHEET_ID", "GOOGLE_OAUTH_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"],
+  "hardcoded_keys_in_old_version": {
+    "note": "FIXED: old version had hardcoded keys — active version uses env vars. Keys rotated 2026-05-24.",
+    "groq": "[ROTATED — set GROQ_API_KEY env var in n8n]",
+    "dashscope": "[ROTATED — set WAN_API_KEY env var in n8n]",
+    "shotstack_stage": "[ROTATED — set SHOTSTACK_API_KEY env var in n8n]"
+  },
+  "active_version_uses_env_vars": true,
+  "tts_provider": "StreamElements Brian (free)",
+  "image_provider": "Dashscope WAN 2.1 turbo",
+  "video_provider": "Shotstack stage",
+  "code_parse_topic": "const xml=$input.first().json.data||'';const m=xml.match(/<title><!\\[CDATA\\[([^\\]]+)\\]\\]><\\/title>/g)||xml.match(/<title>([^<]+)<\\/title>/g)||[];const topics=m.map(t=>t.replace(/<title>|<\\/title>|<!\\[CDATA\\[|\\]\\]>/g,'').trim()).filter(t=>t.length>3&&!t.includes('Google Trends'));const topic=topics[Math.floor(Math.random()*Math.min(topics.length||1,5))]||'AI tools and technology 2024';return[{json:{topic}}];",
+  "code_parse_script": "const raw=$input.first().json.choices[0].message.content;const cleaned=raw.trim().replace(/^```json\\n?|^```\\n?|```$/g,'').trim();const s=JSON.parse(cleaned);return[{json:{title:(s.title||'AI Today').substring(0,60),description:s.description||'Trending.',narration:s.narration||'AI is changing everything.',hashtags:Array.isArray(s.hashtags)?s.hashtags.join(' '):String(s.hashtags||'#AI')}}];",
+  "code_build_shotstack": "const imageUrl=$('Poll Dashscope Image').first().json.output.results[0].url;const ttsUrl=$('Build Metadata').first().json.tts_url;const titleText=$('Build Metadata').first().json.title.substring(0,50);return[{json:{timeline:{background:'#000000',tracks:[{clips:[{asset:{type:'image',src:imageUrl},start:0,length:30,fit:'cover'}]},{clips:[{asset:{type:'audio',src:ttsUrl,trim:0,volume:1},start:0,length:30}]},{clips:[{asset:{type:'title',text:titleText,style:'future',color:'#ffffff',size:'medium',background:'#000000',position:'bottom',offset:{x:0,y:0.15}},start:0,length:6}]}]},output:{format:'mp4',size:{width:720,height:1280},fps:30,quality:'high'}}}];",
+  "code_extract_upload_url": "const r=$input.first().json;const loc=(r.headers&&(r.headers.location||r.headers.Location))||'';return[{json:{upload_url:loc}}];"
+}

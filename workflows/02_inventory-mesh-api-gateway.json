@@ -1,0 +1,16 @@
+{
+  "id": "NwaiZcpzIQgBVDcw",
+  "name": "Inventory Mesh API Gateway",
+  "description": "Webhook POST /inventory-mesh → proxies to Mac via Cloudflare Tunnel → returns inventory JSON.",
+  "active": true,
+  "webhook_path": "/webhook/inventory-mesh",
+  "trigger": "POST webhook",
+  "nodes": [
+    {"name": "Inventory Mesh Webhook", "type": "n8n-nodes-base.webhook", "path": "inventory-mesh", "method": "POST"},
+    {"name": "Proxy to Local Mesh API", "type": "httpRequest", "method": "POST", "url": "https://opposed-sheep-advances-mesh.trycloudflare.com", "body": "JSON.stringify($input.first().json.body || $input.first().json)"},
+    {"name": "Respond to Webhook", "type": "respondToWebhook", "respondWith": "json"}
+  ],
+  "flow": "Webhook → Proxy to Cloudflare Tunnel → Respond",
+  "note": "Cloudflare tunnel URL must be updated when tunnel restarts",
+  "tunnel_url": "https://opposed-sheep-advances-mesh.trycloudflare.com"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "5TxpiqWVcTBwj4Hr",
+  "name": "HMZ — GitHub Daily Auto-Sync",
+  "description": "Daily 11 PM auto-sync: scans ~/installed-repos for new developments, uploads new repos to GitHub, syncs claude-ai-system master repo.",
+  "active": true,
+  "trigger": "Schedule daily 11PM (23:00)",
+  "nodes": [
+    {"name": "Daily 11 PM", "type": "scheduleTrigger", "hour": 23, "minute": 0},
+    {"name": "Run GitHub Daily Sync", "type": "code (python)", "script": "/Users/mc/.claude/bin/github-daily-sync.py", "timeout": 300},
+    {"name": "Sync Master Repo", "type": "code (python)", "script": "/Users/mc/.claude/bin/daily-sync-repos.sh", "timeout": 600},
+    {"name": "Log Results", "type": "code (python)", "log_file": "/Users/mc/.claude/logs/n8n-github-sync.log"}
+  ],
+  "flow": "11PM → github-daily-sync.py → daily-sync-repos.sh → log",
+  "local_scripts": [
+    "/Users/mc/.claude/bin/github-daily-sync.py",
+    "/Users/mc/.claude/bin/daily-sync-repos.sh"
+  ],
+  "log_file": "/Users/mc/.claude/logs/n8n-github-sync.log",
+  "python_github_sync": "subprocess.run(['python3', '/Users/mc/.claude/bin/github-daily-sync.py'], capture_output=True, text=True, timeout=300)",
+  "python_master_sync": "subprocess.run(['bash', '/Users/mc/.claude/bin/daily-sync-repos.sh'], capture_output=True, text=True, timeout=600)"
+}
