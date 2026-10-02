@@ -17,7 +17,7 @@
 | `workflows/07_youtube-shorts-CLEAN-IMPORT.js` | JavaScript workflow construction example; not a JSON export |
 | `workflows/08_hmz-github-daily-auto-sync.json` | GitHub synchronization example |
 
-Names and descriptions are labels in this repository; they do not establish that a workflow was active, production-used, exported from an n8n instance, complete, or restorable. Inspect the workflow structure and node compatibility before use.
+Names and descriptions are labels in this repository; they do not establish that a workflow was active, production-used, exported from an n8n instance, complete, or restorable. Inspect workflow structure and node compatibility before use.
 
 ## Import and review
 
@@ -27,7 +27,7 @@ The repository contains a JavaScript example that imports `@n8n/workflow-sdk`; n
 
 ## Credential exposure
 
-The tracked `ROTATE-KEYS-NOW.md` contained credential-like values and account identifiers. The file is removed in this documentation branch and sensitive-history cleanup is still required. Removing a file from the current branch does not erase prior Git history, clones, caches, or public exposure. The repository owner must revoke and replace any exposed credentials, review provider/account activity, and coordinate history cleanup and downstream clone refresh. Do not reuse credentials found in Git history.
+The tracked [credential response checklist](ROTATE-KEYS-NOW.md) previously contained credential-like values and account identifiers. The current branch rewrites that file without the values, but sensitive-history cleanup is still required. Removing or editing a file in the current branch does not erase prior Git history, clones, caches, or public exposure. The repository owner must revoke and replace any exposed credentials, review provider/account activity, and coordinate history cleanup and downstream clone refresh. Do not reuse credentials found in Git history.
 
 I did not rotate credentials or contact providers. GitHub history and external provider state require maintainer action and cannot be confirmed by this documentation change.
 
