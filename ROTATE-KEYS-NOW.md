@@ -1,30 +1,18 @@
-# Key Rotation Checklist — URGENT
-Exposed in n8n workflow 07 old version history. Rotate all 3.
+# Credential response checklist
 
-## 1. Groq — gsk_OhzRrlOV2...
-- URL: https://console.groq.com/keys
-- Action: Delete old key → Create new → Set in n8n as GROQ_API_KEY env var
+## Current status
 
-## 2. Dashscope (Alibaba WAN) — sk-40238e5d...
-- URL: https://dashscope.console.aliyun.com/apiKey
-- Action: Delete old key → Create new → Set in n8n as WAN_API_KEY env var
+Credential-like values were committed in this document. Assume any real values ever present here are compromised, even if they were later masked or removed from the current branch. This checklist does not prove credentials have been rotated.
 
-## 3. Shotstack Stage — bd18lTNU...
-- URL: https://dashboard.shotstack.io/account/api-keys
-- Action: Regenerate stage key → Set in n8n as SHOTSTACK_API_KEY env var
+## Maintainer actions
 
-## n8n Env Vars to Set (Settings → Variables)
-| Key | Value |
-|-----|-------|
-| GROQ_API_KEY | new key |
-| WAN_API_KEY | new dashscope key |
-| SHOTSTACK_API_KEY | new shotstack key |
-| YOUTUBE_OAUTH_TOKEN | existing |
-| GOOGLE_SHEET_ID | existing |
-| GOOGLE_OAUTH_TOKEN | existing |
-| TELEGRAM_BOT_TOKEN | existing |
-| TELEGRAM_CHAT_ID | existing |
+1. Revoke and replace each credential that appeared in this file or related workflow history, including provider API keys and OAuth or bot credentials.
+2. Review account activity and revoke sessions or grants that cannot be safely retained.
+3. Store replacements only in the relevant provider's secret store or n8n credential manager. Do not put values in Git, issues, logs, or chat.
+4. Review repository history, forks, clones, caches, and downloaded workflow copies. Coordinate history cleanup with affected maintainers and collaborators; history rewriting cannot recall existing copies.
+5. Review workflow node references to ensure they use managed credentials or environment references and contain no literal secret values.
+6. Record completion without recording secret values. Confirm provider-side state directly.
 
-## After rotation: push clean workflow
-When n8n cloud is reachable, use Claude Code MCP:
-update_workflow(workflowId='VfwJVsxihSgOqxoZ', code=<07_youtube-shorts-CLEAN-IMPORT.js>)
+## Scope and limits
+
+I have not revoked credentials, accessed provider accounts, checked provider activity, or rewritten Git history. The repository owner must complete and verify those actions. Do not run the workflow until exposed credentials have been rotated and the workflow has been reviewed in an isolated environment.
